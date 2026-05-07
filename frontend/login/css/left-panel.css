@@ -1,0 +1,218 @@
+/* ============================================================
+   left-panel.css  —  Left Branding Panel
+   ============================================================ */
+
+.left-panel {
+  width: 42%;
+  background: var(--green);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2.5rem 3rem 3rem;
+  overflow: hidden;
+}
+
+/* ── DOT GRID BACKGROUND ── */
+.left-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 32px 32px;
+  z-index: 0;
+}
+
+/* ── DECORATIVE RINGS ── */
+.deco-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.1);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.ring-1 { width: 500px; height: 500px; bottom: -150px; right: -150px; }
+.ring-2 { width: 340px; height: 340px; bottom: -80px;  right: -80px;  border-color: rgba(255,255,255,0.15); }
+.ring-3 { width: 180px; height: 180px; bottom:  30px;  right:  30px;  border-color: rgba(114,189,32,0.4); }
+
+/* ── GLOW BLOBS ── */
+.glow-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.blob-a {
+  width: 350px; height: 350px;
+  background: rgba(114,189,32,0.3);
+  top: -60px; left: -80px;
+}
+
+.blob-b {
+  width: 250px; height: 250px;
+  background: rgba(255,187,0,0.15);
+  bottom: 80px; right: 100px;
+}
+
+/* Z-index stacking for all child sections */
+.left-top,
+.left-mid,
+.left-bottom {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── LOGO ── */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.45rem;
+  color: #fff;
+  text-decoration: none;
+}
+
+.logo-box {
+  width: 40px; height: 40px;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(10px);
+}
+
+.logo-box svg {
+  width: 22px; height: 22px;
+  stroke: #fff; stroke-width: 2; fill: none;
+}
+
+.logo .y { color: var(--yellow); }
+
+/* ── CENTER CONTENT ── */
+.left-mid {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2rem 0;
+}
+
+.left-headline {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 3.5vw, 3.4rem);
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.05;
+  letter-spacing: -1.5px;
+  margin-bottom: 1.2rem;
+}
+
+.left-headline .accent { color: var(--yellow); }
+
+.left-sub {
+  font-size: 1rem;
+  color: rgba(255,255,255,0.75);
+  line-height: 1.7;
+  max-width: 440px;
+  margin-bottom: 2.5rem;
+}
+
+/* ── FEATURE PILLS ── */
+.feature-pills {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.pill {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--radius);
+  padding: 1rem 1.5rem;
+  backdrop-filter: blur(8px);
+  animation: pillIn 0.6s ease both;
+  transition: background var(--ease), transform var(--ease);
+}
+
+.pill:hover {
+  background: rgba(255,255,255,0.14);
+  transform: translateX(4px);
+}
+
+.pill:nth-child(1) { animation-delay: 0.1s; }
+.pill:nth-child(2) { animation-delay: 0.2s; }
+.pill:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes pillIn {
+  from { opacity: 0; transform: translateX(-20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.pill-icon {
+  width: 38px; height: 38px;
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.pill-icon svg {
+  width: 20px; height: 20px;
+  stroke-width: 2; fill: none;
+}
+
+.pill-text strong {
+  display: block;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.pill-text span {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.6);
+}
+
+/* ── TRUST BAR ── */
+.left-bottom {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.5);
+}
+
+.left-bottom .avatars { display: flex; }
+
+.left-bottom .av {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--green);
+  margin-left: -8px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+}
+
+.left-bottom .av:first-child { margin-left: 0; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .left-panel {
+    width: 100%;
+    min-height: 260px;
+    padding: 2rem;
+  }
+
+  .left-mid .feature-pills { display: none; }
+  .left-headline { font-size: 2rem; }
+  .ring-1, .ring-2 { display: none; }
+}

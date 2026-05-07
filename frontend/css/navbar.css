@@ -1,0 +1,91 @@
+/* ============================================================
+   navbar.css
+   ============================================================ */
+
+header.navbar {
+    position: fixed;
+    top: 0; width: 100%;
+    background: rgba(240,245,236,0.88);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    z-index: 1000;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 72px;
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+/* Logo */
+.logo {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    text-decoration: none;
+}
+
+.logo-icon-wrap {
+    width: 36px; height: 36px;
+    background: var(--green);
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+}
+.logo-icon-wrap svg { width: 19px; height: 19px; stroke: #fff; stroke-width: 2; fill: none; }
+
+.logo .g { color: var(--green); }
+.logo .y { color: var(--yellow); }
+
+/* Nav links */
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.nav-links a {
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: color var(--ease);
+    text-decoration: none;
+}
+.nav-links a:hover { color: var(--green); }
+
+/* Login button */
+.btn-login {
+    background: var(--green) !important;
+    border: none;
+    padding: 0.58rem 1.7rem;
+    border-radius: var(--radius-sm);
+    color: #ffffff !important;
+    font-family: var(--font-display) !important;
+    font-weight: 700 !important;
+    font-size: 0.9rem !important;
+    text-decoration: none;
+    transition: all var(--ease) !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.btn-login:hover {
+    background: var(--green-mid) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 5px 16px rgba(0,113,45,0.25) !important;
+    color: #fff !important;
+}
+
+@media (max-width: 768px) {
+    .nav-links a:not(.btn-login) { display: none; }
+}

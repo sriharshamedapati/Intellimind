@@ -1,0 +1,187 @@
+/* ============================================================
+   platforms.css
+   ============================================================ */
+
+.unified-platforms {
+    padding: 6rem 0;
+    background: var(--bg-section);
+    position: relative;
+    z-index: 1;
+}
+
+.platforms-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    align-items: center;
+}
+
+/* ── LEFT ── */
+.platforms-content h2 {
+    font-size: clamp(2rem, 3.5vw, 3.2rem);
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    color: var(--text);
+    margin-bottom: 1rem;
+}
+.platforms-content p {
+    font-size: 1rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-bottom: 2.2rem;
+    max-width: 94%;
+}
+
+/* Tab strip */
+.platform-tabs {
+    display: flex;
+    background: #e4eede;
+    border-radius: 10px;
+    padding: 4px;
+    gap: 4px;
+    margin-bottom: 2rem;
+    width: fit-content;
+}
+
+.platform-tab {
+    padding: 0.52rem 1.3rem;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    font-family: var(--font-body);
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all var(--ease);
+    display: flex; align-items: center; gap: 0.4rem;
+}
+.platform-tab svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; fill: none; transition: stroke var(--ease); }
+.platform-tab.active {
+    background: var(--bg-card);
+    color: var(--green);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* ── RIGHT – Modules visual ── */
+.platforms-visual {
+    position: relative;
+}
+
+.modules-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+}
+
+.modules-card-head {
+    background: var(--green);
+    padding: 1.1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.modules-card-head .mch-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #fff;
+}
+.modules-card-head .mch-badge {
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 999px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.modules-list {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    transition: opacity 0.28s ease, transform 0.28s ease;
+}
+.modules-list.fade-out { opacity: 0; transform: translateY(8px); }
+
+.module-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.1rem 1.3rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: all var(--ease);
+    cursor: default;
+}
+.module-item:hover {
+    transform: translateX(5px);
+    border-color: var(--green);
+    box-shadow: 0 4px 16px rgba(0,113,45,0.1);
+    background: #fff;
+}
+
+.module-info {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.module-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.dot-green  { background: var(--green-mid); }
+.dot-yellow { background: var(--yellow); }
+.dot-green-light { background: var(--green-light); }
+.dot-pink   { background: #ec4899; }
+
+.module-badge {
+    background: rgba(0,113,45,0.07);
+    color: var(--green);
+    border: 1px solid rgba(0,113,45,0.12);
+    padding: 0.28rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.77rem;
+    font-weight: 700;
+}
+
+/* Floating stat chip on the visual */
+.platform-stat-chip {
+    position: absolute;
+    top: -18px; right: -20px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.65rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+    font-size: 0.8rem;
+    font-weight: 600;
+    animation: chipFloat 5s ease-in-out infinite;
+}
+@keyframes chipFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.psc-icon { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+.psc-icon svg { width: 15px; height: 15px; stroke-width: 2; fill: none; }
+.psc-val { font-size: 0.68rem; color: var(--text-muted); }
+.psc-val strong { display: block; font-size: 0.88rem; color: var(--text); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 992px) {
+    .unified-platforms { padding: 5rem 0; }
+    .platforms-grid { grid-template-columns: 1fr; gap: 3rem; }
+    .platforms-visual { margin-top: 1rem; }
+    .platform-stat-chip { display: none; }
+}

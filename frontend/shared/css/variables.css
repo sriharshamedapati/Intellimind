@@ -1,0 +1,33 @@
+/* ============================================================
+   variables.css — IntelliMind Design Tokens (Single Source)
+   ============================================================ */
+
+:root {
+  /* ── BRAND COLORS ── */
+  --green:        #00712D;
+  --green-mid:    #3da84a;
+  --green-light:  #72bd20;
+  --yellow:       #ffbb00;
+  --yellow-soft:  #fff8e1;
+
+  /* ── SURFACE COLORS ── */
+  --bg:           #f0f5ec;
+  --bg-card:      #ffffff;
+  --bg-section:   #f8fbf6;
+
+  /* ── TEXT COLORS ── */
+  --text:         #0d1a0b;
+  --muted:        #5a6b55;
+
+  /* ── BORDERS ── */
+  --border:       #d0e4c4;
+
+  /* ── CODE BLOCK ── */
+  --code-bg:      #0f1e0d;
+  --code-text:    #c8f0c0;
+
+  /* ── TYPOGRAPHY ── */
+  --f-display:    'Inter', sans-serif;
+  --f-body:       'Inter', sans-serif;
+  --f-mono:       'JetBrains Mono', monospace;
+}

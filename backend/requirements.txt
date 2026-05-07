@@ -1,0 +1,28 @@
+# IntelliMind Backend - Requirements
+# Run: pip install -r requirements.txt
+
+# Core Framework
+fastapi>=0.110
+uvicorn[standard]
+python-multipart       # for file uploads (FormData)
+pydantic
+
+# Database
+supabase
+python-dotenv
+
+# AI / HTTP
+requests               # Gemini REST calls (raw HTTP - no SDK needed)
+
+# Document Processing
+PyMuPDF                # PDF text extraction (fitz)
+python-docx            # DOCX text extraction
+
+# Utilities
+reportlab              # PDF report generation (if used)
+
+# REMOVED
+# google-generativeai  <-- BANNED - use raw HTTP (call_gemini_rest) instead
+# sentence-transformers <-- TOO HEAVY (2GB+ download, slow startup)
+# torch                <-- TOO HEAVY (required by sentence-transformers)
+# transformers         <-- TOO HEAVY (required by sentence-transformers)

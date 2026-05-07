@@ -1,0 +1,122 @@
+# =========================
+
+# Python Backend
+
+# =========================
+
+**pycache**/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+*.sqlite3
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Virtual Environments
+
+venv/
+.venv/
+env/
+ENV/
+
+# Environment Variables
+
+.env
+.env.*
+!.env.example
+
+# FastAPI / Uvicorn
+
+*.log
+uvicorn.log
+
+# =========================
+
+# Frontend
+
+# =========================
+
+node_modules/
+dist/
+build/
+coverage/
+
+# Frontend cache
+
+.cache/
+.parcel-cache/
+
+# =========================
+
+# IDE / Editor Files
+
+# =========================
+
+.vscode/
+.idea/
+*.swp
+*.swo
+*.tmp
+
+# =========================
+
+# OS Files
+
+# =========================
+
+.DS_Store
+Thumbs.db
+
+# =========================
+
+# Project Specific
+
+# =========================
+
+backend/**pycache**/
+scratch/
+
+# Ignore generated audio/temp files
+
+*.wav
+*.mp3
+*.tmp
+
+# Ignore local databases
+
+*.db
+
+# =========================
+
+# Archives
+
+# =========================
+
+*.zip
+*.tar
+*.gz
+*.rar
+
+# =========================
+
+# Secrets / API Keys
+
+# =========================
+
+secrets.json
+credentials.json
+
+# =========================
+
+# Misc
+
+# =========================
+
+*.bak
+*.old
+*.orig

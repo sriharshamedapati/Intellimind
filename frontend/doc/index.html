@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IntelliMind – Document Analyser</title>
+<meta name="description" content="Upload study documents for instant AI analysis and interactive Q&A with IntelliMind.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/css/variables.css">
+<link rel="stylesheet" href="../shared/css/reset.css">
+<link rel="stylesheet" href="../shared/css/topbar.css">
+<link rel="stylesheet" href="css/doc.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📄</text></svg>">
+</head>
+<body>
+
+<!-- ── TOPBAR ── -->
+<div class="topbar">
+  <div class="topbar-left">
+    <a href="../index.html" class="logo">
+      <div class="logo-box">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      Intelli<span class="y">Mind</span>
+    </a>
+    <div class="tb-divider"></div>
+    <span class="page-label">Doc Analyser</span>
+  </div>
+
+  <!-- View switcher (visible after analysis) -->
+  <div class="view-switcher" id="viewSwitcher">
+    <button class="vs-btn active" id="vsAnalysis" onclick="switchView('analysis')" title="Analysis view">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <span>Summary</span>
+    </button>
+    <button class="vs-btn" id="vsChat" onclick="switchView('chat')" title="Chat view">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>Chat</span>
+    </button>
+    <button class="vs-btn" id="vsSplit" onclick="switchView('split')" title="Split view">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+      <span>Split</span>
+    </button>
+  </div>
+
+  <div class="topbar-right">
+    <div class="nav-dropdown" id="navDropdown">
+      <button class="nav-dropdown-trigger" id="navDropdownTrigger">
+        <div class="user-av" id="userAv">?</div>
+        <span class="user-name" id="userName">...</span>
+        <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="nav-dropdown-menu">
+        <div class="menu-label">Navigate</div>
+        <a href="../chat/index.html" class="menu-item">
+          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Text Chat
+        </a>
+        <a href="../voice/index.html" class="menu-item">
+          <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+          Voice Chat
+        </a>
+        <a href="../doc/index.html" class="menu-item">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Doc Analyser
+        </a>
+        <a href="../roadmap/index.html" class="menu-item">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Roadmap Planner
+        </a>
+        <div class="menu-divider"></div>
+        <button class="menu-item danger" onclick="doSignOut()">
+          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign Out
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 0: UPLOAD
+══════════════════════════════════════════ -->
+<div class="screen" id="screenUpload">
+  <div class="upload-wrap">
+
+    <div class="upload-hero">
+      <div class="upload-orb">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      </div>
+      <h1 class="upload-title"><span class="accent">Document</span> Analyser</h1>
+      <p class="upload-sub">Upload any study material — notes, textbooks, question papers — get an instant AI summary, then chat with your document to prepare for exams.</p>
+    </div>
+
+    <!-- Drop Zone -->
+    <div class="drop-zone" id="dropZone" onclick="document.getElementById('docInput').click()">
+      <input type="file" id="docInput" accept=".txt,.pdf,.doc,.docx,.md,.csv" hidden>
+      <div class="drop-zone-inner" id="dropZoneInner">
+        <div class="drop-icon">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <div class="drop-label">Drop your file here or <span class="browse-link">browse</span></div>
+        <div class="drop-sub">Notes, question papers, textbook chapters</div>
+        <div class="file-tags">
+          <span class="file-tag">TXT</span>
+          <span class="file-tag">PDF</span>
+          <span class="file-tag">DOCX</span>
+          <span class="file-tag">MD</span>
+          <span class="file-tag">CSV</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- File strip (shown after file selected) -->
+    <div class="file-strip" id="fileStrip">
+      <div class="file-strip-left">
+        <div class="file-icon-wrap">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div class="file-meta">
+          <div class="file-name" id="fileName">document.pdf</div>
+          <div class="file-size" id="fileSize">0 KB</div>
+        </div>
+      </div>
+      <button class="file-remove" id="removeFile" title="Remove">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <!-- Analyse button -->
+    <button class="analyse-btn" id="analyseBtn" onclick="analyseDocument()">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <span id="analyseBtnText">Analyse Document</span>
+    </button>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     LOADING OVERLAY
+══════════════════════════════════════════ -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-card">
+    <div class="loading-orb">
+      <div class="orb-ring"></div>
+      <div class="orb-ring orb-ring--2"></div>
+      <div class="orb-ring orb-ring--3"></div>
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    </div>
+    <div class="loading-title">Analysing Document</div>
+    <div class="loading-sub" id="loadingStatus">Reading file content…</div>
+    <div class="loading-bar">
+      <div class="loading-bar-fill" id="loadingBarFill"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 1: ANALYSIS PANEL
+══════════════════════════════════════════ -->
+<div class="screen hidden" id="screenAnalysis">
+  <div class="analysis-panel">
+    <div class="panel-header">
+      <div class="panel-header-icon">
+        <svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+      </div>
+      <div>
+        <div class="panel-header-title">Analysis Complete</div>
+        <div class="panel-header-file" id="resultFileNameA"></div>
+      </div>
+      <button class="new-doc-btn" onclick="resetToUpload()">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Document
+      </button>
+    </div>
+    <div class="panel-body" id="resultBodyA"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 2: CHAT PANEL
+══════════════════════════════════════════ -->
+<div class="screen hidden" id="screenChat">
+  <div class="chat-panel">
+    <div class="chat-panel-header">
+      <div class="chat-header-icon">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <div>
+        <div class="chat-header-title">Chat with Document</div>
+        <div class="chat-header-sub" id="chatDocNameC">your document</div>
+      </div>
+    </div>
+
+    <div class="chat-messages" id="chatMessagesC">
+      <div class="chat-welcome">
+        <div class="chat-welcome-icon">
+          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div class="chat-welcome-text">Ask me anything about your document!</div>
+        <div class="quick-chips">
+          <div class="chip" onclick="prefillChat('Summarise the key points')">Summarise key points</div>
+          <div class="chip" onclick="prefillChat('What are the main topics?')">Main topics</div>
+          <div class="chip" onclick="prefillChat('Create 5 quiz questions from this document')">Quiz questions</div>
+          <div class="chip" onclick="prefillChat('Explain the most important concept')">Key concept</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-input-area">
+      <div class="chat-input-box">
+        <textarea id="chatInputC" class="chat-textarea" rows="1"
+          placeholder='Ask about your document… (Enter to send)'
+          oninput="autoResizeC(this)" onkeydown="handleChatKeyC(event)"></textarea>
+        <button class="chat-send" onclick="sendDocMessage('C')">
+          <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 3: SPLIT VIEW
+══════════════════════════════════════════ -->
+<div class="screen hidden" id="screenSplit">
+  <div class="split-layout">
+
+    <!-- Left: Analysis -->
+    <div class="split-pane split-pane--left">
+      <div class="split-pane-header">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span id="splitDocName">Document Analysis</span>
+      </div>
+      <div class="split-pane-body" id="resultBodyS"></div>
+    </div>
+
+    <!-- Divider -->
+    <div class="split-divider" id="splitDivider"></div>
+
+    <!-- Right: Chat -->
+    <div class="split-pane split-pane--right">
+      <div class="split-pane-header">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span>Chat with Document</span>
+      </div>
+
+      <div class="chat-messages" id="chatMessagesS">
+        <div class="chat-welcome chat-welcome--sm">
+          <div class="chat-welcome-text">Ask me anything about this document</div>
+          <div class="quick-chips">
+            <div class="chip" onclick="prefillChatS('Summarise the key points')">Summarise</div>
+            <div class="chip" onclick="prefillChatS('Create 5 quiz questions')">Quiz questions</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-input-area">
+        <div class="chat-input-box">
+          <textarea id="chatInputS" class="chat-textarea" rows="1"
+            placeholder='Ask about the document…'
+            oninput="autoResizeS(this)" onkeydown="handleChatKeyS(event)"></textarea>
+          <button class="chat-send" onclick="sendDocMessage('S')">
+            <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Scripts -->
+<script src="../shared/js/config.js"></script>
+<script src="../shared/js/toast.js"></script>
+<script src="../shared/js/markdown.js"></script>
+<script src="js/doc.js"></script>
+<script src="../shared/js/auth.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IntelliMind – Roadmap Planner</title>
+<meta name="description" content="AI-powered personalized study roadmap planner for IntelliMind students">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- Shared CSS -->
+<link rel="stylesheet" href="../shared/css/variables.css">
+<link rel="stylesheet" href="../shared/css/reset.css">
+<link rel="stylesheet" href="../shared/css/topbar.css">
+
+<!-- Page CSS -->
+<link rel="stylesheet" href="css/roadmap.css?v=4">
+
+<!-- Supabase CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+</head>
+<body>
+
+<!-- ── LOADING OVERLAY ── -->
+<div class="loading-overlay hidden" id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Generating your personalised plan…</div>
+</div>
+
+<!-- ── TOPBAR ── -->
+<div class="topbar">
+  <div class="topbar-left">
+    <a href="../index.html" class="logo">
+      <div class="logo-box">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+          <path d="M2 17l10 5 10-5"/>
+          <path d="M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      Intelli<span class="y">Mind</span>
+    </a>
+    <div class="tb-divider"></div>
+    <span class="page-label">Roadmap</span>
+  </div>
+
+  <div class="topbar-right">
+    <div class="nav-dropdown" id="navDropdown">
+      <button class="nav-dropdown-trigger" id="navDropdownTrigger">
+        <div class="user-av" id="userAv">?</div>
+        <span class="user-name" id="userName">...</span>
+        <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="nav-dropdown-menu">
+        <div class="menu-label">Navigate</div>
+        <a href="../chat/index.html" class="menu-item">
+          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Text Chat
+        </a>
+        <a href="../voice/index.html" class="menu-item">
+          <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+          Voice Chat
+        </a>
+        <a href="../doc/index.html" class="menu-item">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Doc Analyser
+        </a>
+        <a href="../roadmap/index.html" class="menu-item">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Roadmap Planner
+        </a>
+        <div class="menu-divider"></div>
+        <button class="menu-item danger" onclick="doSignOut()">
+          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign Out
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── PAGE ── -->
+<div class="page-wrap">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-tag">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Roadmap Planner
+      </div>
+      <h1 class="page-title">Your <span>Study Roadmap</span></h1>
+      <p class="page-sub">AI-generated study plans based on your actual performance on Maya and Hoot. Follow a structured daily path and track your progress.</p>
+    </div>
+
+    <!-- Monthly Limit Badge -->
+    <div class="limit-badge" id="limitBadge">
+      <div>
+        <div class="label" id="limitLabel">0/3 plans this month</div>
+        <div class="sub">Monthly limit: 3 plans</div>
+      </div>
+      <div class="limit-dots">
+        <div class="limit-dot" id="dot0"></div>
+        <div class="limit-dot" id="dot1"></div>
+        <div class="limit-dot" id="dot2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Today's Task Banner -->
+  <div class="today-banner hidden" id="todayBanner">
+    <div class="today-icon">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    </div>
+    <div class="today-content">
+      <div class="today-label">
+        <span id="todayDay">Day 1</span> &nbsp;·&nbsp; Today's Task
+      </div>
+      <div class="today-task" id="todayTaskText">Loading…</div>
+      <div class="today-meta" id="todayMeta"></div>
+    </div>
+    <button class="today-done-btn" id="todayDoneBtn">Mark Done</button>
+  </div>
+
+  <!-- Main Grid -->
+  <div class="rm-grid">
+
+    <!-- Generate Panel -->
+      <div class="panel" style="margin-bottom:1.5rem">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            Generate New Plan
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label>What do you want to learn?</label>
+            <input type="text" id="roadmapTopic" class="roadmap-input" placeholder="e.g. Python, General CS, Data Analysis...">
+          </div>
+
+          <div class="form-group">
+            <label>Plan Duration</label>
+            <div class="duration-selector">
+              <button class="dur-btn selected" data-days="7"  onclick="selectDuration(7)">7<span class="dur-label">days</span></button>
+              <button class="dur-btn"          data-days="15" onclick="selectDuration(15)">15<span class="dur-label">days</span></button>
+              <button class="dur-btn"          data-days="21" onclick="selectDuration(21)">21<span class="dur-label">days</span></button>
+              <button class="dur-btn"          data-days="30" onclick="selectDuration(30)">30<span class="dur-label">days</span></button>
+            </div>
+          </div>
+
+          <div class="plan-rules">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Complete your current active plan before creating a new one.
+          </div>
+
+          <button class="btn-generate" id="genBtn" onclick="generatePlan()">
+            <svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            Generate Plan
+          </button>
+
+          <div class="limit-warning hidden" id="limitWarn">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Monthly limit reached (3/3). New plans available next month.
+          </div>
+        </div>
+      </div>
+
+      <!-- Plans List -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            My Study Plans
+          </div>
+        </div>
+        <div class="panel-body" style="padding:0.75rem">
+          <div class="plans-list" id="plansList">
+            <div class="empty-state">
+              <div class="empty-icon">
+                <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              </div>
+              <div class="empty-title">No plans yet</div>
+              <div class="empty-sub">Generate your first AI study plan to get started!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+  </div><!-- /rm-grid -->
+</div><!-- /page-wrap -->
+
+<script src="../shared/js/config.js"></script>
+<script src="../shared/js/toast.js"></script>
+<script src="js/roadmap.js"></script>
+<script src="../shared/js/auth.js"></script>
+
+</body>
+</html>

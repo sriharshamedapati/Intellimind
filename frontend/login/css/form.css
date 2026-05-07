@@ -1,0 +1,395 @@
+/* ============================================================
+   form.css  —  Right Panel, Form, Fields, Buttons, States
+   ============================================================ */
+
+/* ── RIGHT PANEL ── */
+.right-panel {
+  width: 58%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem;
+  position: relative;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.right-panel::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 280px; height: 280px;
+  border-radius: 50%;
+  background: rgba(0,113,45,0.06);
+  pointer-events: none;
+}
+
+.right-panel::after {
+  content: '';
+  position: absolute;
+  bottom: -40px; left: -40px;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: rgba(255,187,0,0.06);
+  pointer-events: none;
+}
+
+/* ── FORM CONTAINER ── */
+.form-container {
+  width: 100%;
+  max-width: 440px;
+  position: relative;
+  z-index: 1;
+  animation: fadeUp 0.7s ease both;
+}
+
+/* ── FORM TAG (badge above title) ── */
+.form-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.73rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--green);
+  background: rgba(0,113,45,0.07);
+  border: 1px solid rgba(0,113,45,0.15);
+  padding: 0.3rem 0.85rem;
+  border-radius: 999px;
+  margin-bottom: 1.2rem;
+}
+
+/* ── TITLES ── */
+.form-title {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -1px;
+  margin-bottom: 0.4rem;
+  line-height: 1.1;
+}
+
+.form-subtitle {
+  font-size: 0.92rem;
+  color: var(--muted);
+  margin-bottom: 2rem;
+}
+
+
+/* ── ERROR BANNER ── */
+.error-banner {
+  display: none;
+  align-items: flex-start;
+  gap: 0.6rem;
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.2rem;
+  font-size: 0.84rem;
+  color: var(--error);
+  font-weight: 500;
+  animation: slideDown 0.3s ease;
+}
+
+.error-banner.show { display: flex; }
+
+.error-banner svg {
+  width: 16px; height: 16px;
+  stroke: var(--error); stroke-width: 2; fill: none;
+  flex-shrink: 0; margin-top: 1px;
+}
+
+/* ── FIELD ── */
+.field {
+  margin-bottom: 1.25rem;
+}
+
+.field label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.45rem;
+  letter-spacing: 0.01em;
+}
+
+.field label span { color: var(--error); }
+
+.field-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.45rem;
+}
+
+/* ── INPUT WRAP ── */
+.input-wrap {
+  position: relative;
+}
+
+.input-icon {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  display: flex;
+}
+
+.input-icon svg {
+  width: 16px; height: 16px;
+  stroke: var(--muted);
+  stroke-width: 2; fill: none;
+  transition: stroke var(--ease);
+}
+
+.input-wrap input {
+  width: 100%;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 0.83rem 2.85rem 0.83rem 2.55rem;
+  font-family: var(--font-body);
+  font-size: 0.93rem;
+  color: var(--text);
+  outline: none;
+  transition: all var(--ease);
+}
+
+.input-wrap input::placeholder { color: #b0bfaa; }
+
+.input-wrap input:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 4px rgba(0,113,45,0.08);
+  background: var(--white);
+}
+
+/* Icon color when focused or filled */
+.input-wrap input:focus + .input-icon svg,
+.input-wrap input:not(:placeholder-shown) + .input-icon svg {
+  stroke: var(--green);
+}
+
+/* ── EYE TOGGLE ── */
+.eye-btn {
+  position: absolute;
+  right: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: var(--muted);
+  transition: color var(--ease);
+  display: flex;
+  z-index: 2;
+}
+
+.eye-btn:hover { color: var(--green); }
+
+.eye-btn svg {
+  width: 16px; height: 16px;
+  stroke: currentColor;
+  stroke-width: 2; fill: none;
+  display: block;
+}
+
+/* ── FIELD HINTS & ERRORS ── */
+.input-hint {
+  font-size: 0.74rem;
+  color: var(--muted);
+  margin-top: 0.38rem;
+  display: flex;
+  align-items: center;
+  gap: 0.38rem;
+}
+
+.input-hint svg {
+  width: 11px; height: 11px;
+  stroke: var(--muted); stroke-width: 2; fill: none;
+  flex-shrink: 0;
+}
+
+.error-msg {
+  font-size: 0.76rem;
+  color: var(--error);
+  margin-top: 0.38rem;
+  display: none;
+}
+
+/* Error state */
+.field.error input {
+  border-color: var(--error);
+  box-shadow: none;
+}
+
+.field.error input:focus {
+  box-shadow: 0 0 0 4px rgba(220,38,38,0.08);
+}
+
+.field.error .error-msg { display: block; }
+
+/* ── FORGOT LINK ── */
+.forgot-link {
+  font-size: 0.78rem;
+  color: var(--green);
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity var(--ease);
+}
+
+.forgot-link:hover { opacity: 0.7; }
+
+/* ── SUBMIT BUTTON ── */
+.btn-submit {
+  width: 100%;
+  background: var(--green);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.93rem;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.28s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  position: relative;
+  overflow: hidden;
+  margin-top: 0.4rem;
+}
+
+/* Shine overlay */
+.btn-submit::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.btn-submit:hover {
+  background: var(--green-mid);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-green);
+}
+
+.btn-submit:hover::before { opacity: 1; }
+.btn-submit:active         { transform: translateY(0); }
+
+.btn-submit svg {
+  width: 17px; height: 17px;
+  stroke: #fff; stroke-width: 2.5; fill: none;
+  transition: transform 0.28s ease;
+}
+
+.btn-submit:hover svg { transform: translateX(4px); }
+
+/* Loading state */
+.btn-submit.loading {
+  background: var(--green-mid);
+  pointer-events: none;
+}
+
+.btn-submit:disabled {
+  pointer-events: none;
+}
+
+/* ── SPINNER ── */
+.spinner {
+  display: none;
+  width: 18px; height: 18px;
+  border: 2.5px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+
+/* ── HELP TEXT ── */
+.form-help {
+  text-align: center;
+  margin-top: 1.3rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.form-help a {
+  color: var(--green);
+  font-weight: 600;
+}
+
+.form-help a:hover { text-decoration: underline; }
+
+/* ── SUCCESS OVERLAY ── */
+.success-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,113,45,0.96);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.success-overlay.show {
+  display: flex;
+  animation: fadeIn 0.4s ease;
+}
+
+.success-check {
+  width: 80px; height: 80px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  animation: successPop 0.5s ease;
+}
+
+.success-check svg {
+  width: 40px; height: 40px;
+  stroke: #fff; stroke-width: 2.5; fill: none;
+}
+
+.success-overlay h3 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: #fff;
+  font-weight: 700;
+}
+
+.success-overlay .success-sub {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.75);
+}
+
+.success-overlay .success-roll {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  color: var(--yellow);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .right-panel {
+    width: 100%;
+    padding: 2rem 1.5rem 3rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-title { font-size: 1.8rem; }
+}
