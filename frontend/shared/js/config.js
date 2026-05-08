@@ -11,6 +11,5 @@
 const API_BASE = (
   window.location.hostname === "localhost" ||
   window.location.hostname === "127.0.0.1"
-) ? "http://127.0.0.1:8000" : "";
-// Production: empty string means same-origin (API served from same domain)
-// If API is on a different domain, replace "" with the full URL e.g. "https://api.intellimind.io"
+) ? "http://127.0.0.1:8000" : "https://intellimind-5e8m.onrender.com";
+// Production: API is hosted on Render at https://intellimind-5e8m.onrender.com
