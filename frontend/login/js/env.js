@@ -20,9 +20,9 @@ const ENV = {
   OTHER_LOG_TABLE: "student_logins",
 
   // ── BACKEND ───────────────────────────────────────────────
-  BACKEND_URL: "http://127.0.0.1:8000",
+  BACKEND_URL: "https://intellimind-5e8m.onrender.com",
 
-  MODE: "development",
+  MODE: "production",
 };
 
 Object.freeze(ENV);

@@ -37,7 +37,7 @@ class HeroSection extends HTMLElement {
                             <div class="abstract-orb-wrapper">
                                 <div class="dial-circle"></div>
                                 <div class="abstract-orb">
-                                    <img src="../images/robot.png" alt="IntelliMind AI Robot">
+                                    <img src="images/robot.png" alt="IntelliMind AI Robot">
                                 </div>
                             </div>
 
