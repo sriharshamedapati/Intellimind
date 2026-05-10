@@ -1,5 +1,5 @@
 /**
- * env.js  —  IntelliMind Frontend Config
+ * env.js  —  INTELLMIND Frontend Config
  * ========================================
  * Single source of truth for all frontend keys and settings.
  * These are publishable/anon keys — safe for client use.
@@ -20,9 +20,9 @@ const ENV = {
   OTHER_LOG_TABLE: "student_logins",
 
   // ── BACKEND ───────────────────────────────────────────────
-  BACKEND_URL: "https://intellimind-5e8m.onrender.com",
+  BACKEND_URL: "http://127.0.0.1:8000",
 
-  MODE: "production",
+  MODE: "development",
 };
 
 Object.freeze(ENV);

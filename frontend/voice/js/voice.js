@@ -1,5 +1,5 @@
 /* ============================================================
-   voice.js — IntelliMind Voice Chat
+   voice.js — INTELLMIND Voice Chat
    ============================================================
    Features:
    - Chrome TTS keepalive workaround (prevents 15s auto-pause)
@@ -9,13 +9,6 @@
    - Status indicator (Idle → Listening → Processing → Speaking)
    - Browser compatibility check at startup
    - Auto-listen retry guard (max 2 consecutive failures)
-   
-   FIXES:
-   - Added Chrome TTS keepalive (speechSynthesis.resume() interval)
-   - Added browser capability detection with clear messaging
-   - Added auto-listen retry limit to prevent infinite loops
-   - Added microphone permission error handling
-   - Added speechSynthesis warmup for Chrome
    ============================================================ */
 
 const VOICE_CHAT_URL = API_BASE + "/chat";
@@ -228,7 +221,7 @@ function addMessage(role, text) {
 
   const sender = document.createElement("div");
   sender.className = "msg-sender";
-  sender.textContent = role === "user" ? STUDENT_ROLL : "IntelliMind";
+  sender.textContent = role === "user" ? STUDENT_ROLL : "INTELLMIND";
 
   const bubble = document.createElement("div");
   bubble.className = "msg-bubble";
@@ -521,9 +514,13 @@ async function callBackend(userText) {
   setStatus("processing");
 
   try {
+    const token = await getAuthToken();
     const res = await fetch(VOICE_CHAT_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
       body: JSON.stringify({
         message: userText,
         student_roll: STUDENT_ROLL,

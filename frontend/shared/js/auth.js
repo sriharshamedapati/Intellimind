@@ -3,11 +3,6 @@
    ============================================================
    Usage: Include Supabase CDN before this script.
    Auto-initializes on load.
-   
-   FIXES:
-   - Added try/catch around Supabase client creation
-   - Added graceful fallback if Supabase connection fails
-   - Better error logging for debugging
    ============================================================ */
 
 const SUPABASE_URL = "https://esnbwpkgjqoluqcxpnmg.supabase.co";
@@ -55,9 +50,12 @@ async function checkSession() {
       return data.session;
     } catch (err) {
       console.warn("[auth] Session check failed:", err.message);
-      // Don't redirect on network errors — let the user continue 
-      // if they have a roll number stored
-      return { user: { id: sessionStorage.getItem("im_uid") || "" } };
+      // Supabase session check threw an error — clear and redirect (No exceptions)
+      sessionStorage.removeItem("im_roll");
+      sessionStorage.removeItem("im_email");
+      sessionStorage.removeItem("im_uid");
+      window.location.replace(LOGIN_PAGE);
+      return null;
     }
   }
 
@@ -92,6 +90,29 @@ async function doSignOut() {
   sessionStorage.removeItem("im_email");
   sessionStorage.removeItem("im_uid");
   window.location.replace(LOGIN_PAGE);
+}
+
+/* ── Token Helper ── */
+async function getAuthToken() {
+  if (!sb) {
+    console.warn("[auth] Supabase client not available for token retrieval");
+    return null;
+  }
+  try {
+    const { data, error } = await sb.auth.getSession();
+    if (error) {
+      console.warn("[auth] getSession error:", error.message);
+      return null;
+    }
+    if (!data?.session?.access_token) {
+      console.warn("[auth] No active session found");
+      return null;
+    }
+    return data.session.access_token;
+  } catch (err) {
+    console.error("[auth] getAuthToken failed:", err);
+    return null;
+  }
 }
 
 /* ── Dropdown Toggle ── */

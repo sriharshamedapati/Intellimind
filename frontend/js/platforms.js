@@ -11,7 +11,7 @@ class UnifiedPlatforms extends HTMLElement {
                             Platforms
                         </div>
                         <h2>Two platforms.<br>One unified<br>intelligence.</h2>
-                        <p>IntelliMind seamlessly connects Maya and HOOT to give you a complete picture of your learning journey across all modules.</p>
+                        <p>INTELLMIND seamlessly connects Maya and HOOT to give you a complete picture of your learning journey across all modules.</p>
 
                         <div class="platform-tabs">
                             <button class="platform-tab active" id="tabMaya">

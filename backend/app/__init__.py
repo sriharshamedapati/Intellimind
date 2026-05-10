@@ -1,1 +1,1 @@
-# app package — IntelliMind Backend
+# app package — INTELLMIND Backend

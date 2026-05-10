@@ -4,8 +4,10 @@ chat.py — Chat Route (Smart Token Management)
 POST /chat  →  AI-powered tutoring with intent-based data fetching.
 Only fetches the data sources that the student's question actually needs.
 """
-from fastapi import APIRouter, HTTPException
+import re
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
+from app.auth import get_current_user, verify_student_roll
 
 from app.services.gemini import call_gemini, extract_text
 from app.services.intent import detect_intent
@@ -16,7 +18,7 @@ from app.services.maya_service import (
     get_problem_dashboard,
     get_skill_tags_details,
 )
-from app.services.student_service import get_recent_summaries, save_chat_summary, get_user_id
+from app.services.student_service import get_student_memory, save_chat_summary, get_user_id
 from app.services.summarizer import summarize_chat, calculate_score
 from app.services.recommender import generate_recommendations
 
@@ -32,13 +34,20 @@ class ChatRequest(BaseModel):
 
 
 @router.post("/chat")
-async def chat(request: ChatRequest):
+async def chat(request: ChatRequest, user: dict = Depends(get_current_user)):
     roll = request.student_roll.upper().strip()
-    message = request.message.strip()
-    mode = request.mode.lower()
 
     if not roll:
         raise HTTPException(status_code=400, detail="student_roll is required")
+
+    if not re.match(r"^[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{4}$", roll):
+        raise HTTPException(status_code=422, detail="Invalid roll number format. Expected format: 22A91A0501")
+
+    # Security: Verify that the authenticated user is accessing their own data
+    verify_student_roll(roll, user)
+    message = request.message.strip()
+    mode = request.mode.lower()
+
     if not message:
         raise HTTPException(status_code=400, detail="message is required")
 
@@ -54,10 +63,26 @@ async def chat(request: ChatRequest):
 
     # Memory: needed for memory, performance, or placement intents
     if "memory" in intents or "performance" in intents or "placement" in intents:
-        past_summaries = get_recent_summaries(roll)
-        memory_context = "\n".join(past_summaries) if past_summaries else None
-        data["memory"] = memory_context
-        print(f"[chat] 📚 Fetched memory ({len(past_summaries)} summaries)")
+        past_sessions = get_student_memory(roll)
+        if past_sessions:
+            formatted_history = []
+            for i, s in enumerate(past_sessions):
+                date_str = s.get("date", "Unknown Date")[:10]
+                session_block = (
+                    f"--- SESSION {i+1} ({date_str}) ---\n"
+                    f"Summary: {s.get('summary')}\n"
+                    f"Topics: {', '.join(s.get('topics', []))}\n"
+                    f"Weaknesses: {', '.join(s.get('weaknesses', []))}\n"
+                    f"Score: {s.get('score')}/100"
+                )
+                formatted_history.append(session_block)
+            
+            memory_context = "\n\n".join(formatted_history)
+            data["memory"] = memory_context
+            print(f"[chat] 📚 Fetched memory ({len(past_sessions)} sessions)")
+        else:
+            data["memory"] = None
+            print(f"[chat] 📚 No previous sessions found for memory")
     else:
         data["memory"] = None
 

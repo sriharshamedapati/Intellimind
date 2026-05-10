@@ -3,11 +3,8 @@ hoot_data.py — Hoot Platform Data Fetcher
 ==========================================
 Fetches student LSRW module attempt data from the Hoot (aihoot.in) API.
 """
-
+import os
 import requests
-import urllib3
-
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 HOOT_URL = "https://aihoot.in:5001/api/get-individual-module-attempts-by-user-id"
 
@@ -18,13 +15,16 @@ HEADERS = {
 
 
 def _post(user_id: str) -> dict:
+    ca_bundle = os.getenv("HOOT_CA_BUNDLE")
+    verify_cert = ca_bundle if ca_bundle else True
+
     try:
         res = requests.post(
             HOOT_URL,
             json={"user_id": user_id},
             headers=HEADERS,
             timeout=10,
-            verify=False,
+            verify=verify_cert,
         )
         res.raise_for_status()
         return res.json()

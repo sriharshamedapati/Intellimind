@@ -1,4 +1,4 @@
-# IntelliMind Backend - Requirements
+# INTELLMIND Backend - Requirements
 # Run: pip install -r requirements.txt
 
 # Core Framework
@@ -19,7 +19,6 @@ PyMuPDF                # PDF text extraction (fitz)
 python-docx            # DOCX text extraction
 
 # Utilities
-reportlab              # PDF report generation (if used)
 
 # REMOVED
 # google-generativeai  <-- BANNED - use raw HTTP (call_gemini_rest) instead

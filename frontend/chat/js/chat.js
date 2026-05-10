@@ -1,5 +1,5 @@
 /* ============================================================
-   chat.js — IntelliMind Chat Logic
+   chat.js — INTELLMIND Chat Logic
    ============================================================
    Features:
    - Smart API calls using API_BASE from config.js
@@ -61,9 +61,14 @@ async function callBackend(userMsg) {
     payload.image_mime_type = selectedImageMimeType;
   }
 
+  const token = await getAuthToken();
+
   const res = await fetch(CHAT_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
     body: JSON.stringify(payload)
   });
 
@@ -77,6 +82,9 @@ async function callBackend(userMsg) {
 }
 
 /* ── Message Rendering ── */
+// Bot uses full markdown rendering, user messages are simply escaped
+// NOTE: renderMarkdown() and esc() are defined in shared/js/markdown.js
+// markdown.js MUST be loaded before chat.js in the HTML
 function now() {
   return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
@@ -95,7 +103,7 @@ function addMessage(role, rawText, imageSrc = null) {
 
   const sender = document.createElement("div");
   sender.className = "msg-sender";
-  sender.textContent = role === "bot" ? "IntelliMind" : (STUDENT_ROLL || "You");
+  sender.textContent = role === "bot" ? "INTELLMIND" : (STUDENT_ROLL || "You");
 
   const bubble = document.createElement("div");
   bubble.className = "msg-bubble";
@@ -145,7 +153,7 @@ function showTyping(on) {
   row.classList.toggle("visible", on);
   // Update thinking label
   const label = document.getElementById("thinkingLabel");
-  if (label) label.textContent = "IntelliMind is thinking...";
+  if (label) label.textContent = "INTELLMIND is thinking...";
   if (on) scrollBottom();
 }
 

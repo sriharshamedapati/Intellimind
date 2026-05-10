@@ -5,16 +5,14 @@ POST /analyze-doc  → Upload study material, extract text, get AI summary
                      Returns session_id for follow-up chat
 POST /doc/chat     → Ask questions about the uploaded document
                      Uses session_id to retrieve stored document text
-
-Owner: Srikanth / Karthik (integration)
 """
 
 import io
 import uuid
-import time
 from datetime import datetime, timezone
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
 from pydantic import BaseModel
+from app.auth import get_current_user, verify_student_roll
 
 from app.services.gemini import call_gemini_rest, extract_text
 
@@ -93,11 +91,14 @@ def _extract_text(filename: str, content: bytes) -> str:
 async def analyze_doc(
     file: UploadFile = File(...),
     student_roll: str = Form(""),
+    user: dict = Depends(get_current_user),
 ):
     """
     Upload a study document. Returns session_id + AI analysis (summary, topics, key points).
     Use the session_id in /doc/chat to ask follow-up questions.
     """
+    # Security check
+    verify_student_roll(student_roll, user)
     _prune_expired()
 
     raw = await file.read()
@@ -132,7 +133,7 @@ async def analyze_doc(
     print(f"[doc] 📄 Session {session_id[:8]}… created | {len(text)} chars | {filename}")
 
     # Build analysis prompt
-    prompt = f"""You are IntelliMind, an expert AI study assistant.
+    prompt = f"""You are INTELLMIND, an expert AI study assistant.
 
 A student has uploaded the following study document:
 
@@ -184,7 +185,7 @@ class DocChatRequest(BaseModel):
 
 
 @router.post("/doc/chat")
-async def doc_chat(request: DocChatRequest):
+async def doc_chat(request: DocChatRequest, user: dict = Depends(get_current_user)):
     """
     Ask a follow-up question about the uploaded document.
     Requires a valid session_id from /analyze-doc.
@@ -201,6 +202,9 @@ async def doc_chat(request: DocChatRequest):
             detail="Session not found or expired. Please re-upload your document."
         )
 
+    # Security check
+    verify_student_roll(request.student_roll, user)
+
     doc_text = session["text"]
     filename = session["filename"]
     question = request.question.strip()
@@ -208,10 +212,8 @@ async def doc_chat(request: DocChatRequest):
     if not question:
         raise HTTPException(status_code=400, detail="question cannot be empty")
 
-    # ── THE CRITICAL PROMPT FIX ──────────────────────────────────────────────
-    # Previously: document was NOT passed to /doc/chat → AI said "info not provided"
-    # Now: full document (up to 60k chars) is ALWAYS included in the prompt
-    prompt = f"""You are IntelliMind, an expert AI study assistant helping a student prepare for exams.
+    # Build prompt with full document context for accurate Q&A
+    prompt = f"""You are INTELLMIND, an expert AI study assistant helping a student prepare for exams.
 
 The student has uploaded a document called "{filename}".
 Here is the COMPLETE content of that document:

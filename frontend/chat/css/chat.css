@@ -29,9 +29,15 @@ html, body { overflow:hidden; }
 .welcome-orb {
   width:74px; height:74px;
   background:linear-gradient(135deg,var(--green),var(--green-light));
-  border-radius:20px; display:flex; align-items:center; justify-content:center;
-  margin-bottom:1.3rem; box-shadow:0 14px 36px rgba(0,113,45,0.24);
-  animation:orbBob 4s ease-in-out infinite;
+  border-radius:24px; display:flex; align-items:center; justify-content:center;
+  margin-bottom:1.3rem; 
+  box-shadow: 0 0 0 0 rgba(0, 113, 45, 0.4);
+  animation: orbBob 4s ease-in-out infinite, orbPulse 2.5s infinite cubic-bezier(0.66, 0, 0, 1);
+}
+@keyframes orbPulse {
+  to {
+    box-shadow: 0 0 0 25px rgba(0, 113, 45, 0);
+  }
 }
 @keyframes orbBob { 0%,100%{transform:translateY(0) rotate(0deg);} 50%{transform:translateY(-7px) rotate(2deg);} }
 .welcome-orb svg { width:36px; height:36px; stroke:#fff; stroke-width:1.8; fill:none; }

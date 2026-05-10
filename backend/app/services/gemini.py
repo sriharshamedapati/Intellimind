@@ -1,14 +1,7 @@
 """
 gemini.py — Shared Gemini API Client
 ====================================
-Handles all Gemini API communication.
-Used by chat, summarizer, and document analysis.
-
-FIXES (Bad Gateway Root Cause):
-- gemini-2.5-flash requires v1beta endpoint — NOT v1
-- Model cascade now correctly leads with gemini-2.5-flash on v1beta
-- Removed deprecated gemini-1.0-pro / gemini-pro (always 404)
-- config.py GEMINI_URL is no longer ignored
+Handles all Gemini API communication with aggressive retry logic.
 """
 
 import time
@@ -24,24 +17,17 @@ def call_gemini(
     max_tokens: int = 2048,
     response_mime_type: str = "text/plain",
 ) -> dict:
-    """
-    Send prompt (and optional image) to Gemini API and return raw JSON response.
-    Uses a model cascade: tries primary model first, falls back on 404/500.
-    """
-
     if not settings.GEMINI_API_KEY:
         return {"error": "GEMINI_API_KEY not set in .env"}
 
     parts = [{"text": prompt}]
     if image_data and "data" in image_data and "mime_type" in image_data:
-        parts.append(
-            {
-                "inline_data": {
-                    "mime_type": image_data["mime_type"],
-                    "data": image_data["data"],
-                }
+        parts.append({
+            "inline_data": {
+                "mime_type": image_data["mime_type"],
+                "data": image_data["data"],
             }
-        )
+        })
 
     gen_config: dict = {
         "temperature": temperature,
@@ -58,29 +44,30 @@ def call_gemini(
     _KEY = settings.GEMINI_API_KEY
 
     # ── Model cascade ──────────────────────────────────────────────────────────
-    # CRITICAL: gemini-2.5-flash ONLY works on v1beta, NOT v1.
-    # gemini-1.5-flash / gemini-1.5-flash-8b work on v1 (stable).
-    # Deprecated models (gemini-1.0-pro, gemini-pro) removed — always 404.
+    # VERIFIED via /v1beta/models — only these models exist on this API key.
+    # All 1.5 models are GONE (404). Use 2.x+ only.
+    # Lite models have SEPARATE rate-limit buckets → great fallback for 429.
     # ──────────────────────────────────────────────────────────────────────────
     models_to_try = [
-        # (model_name, api_version)
-        ("gemini-2.5-flash",       "v1beta"),   # PRIMARY — matches config.py
-        ("gemini-2.0-flash",       "v1beta"),   # fallback (stable 2.0)
-        ("gemini-1.5-flash",       "v1"),       # fallback (free tier stable)
-        ("gemini-1.5-flash-8b",    "v1"),       # fallback (lightweight free tier)
+        # (model_name, api_version, max_retries)
+        ("gemini-2.5-flash",           "v1beta", 3),   # PRIMARY (newest, best)
+        ("gemini-2.0-flash",           "v1beta", 3),   # Strong fallback
+        ("gemini-2.5-flash-lite",      "v1beta", 2),   # Lite = separate quota
+        ("gemini-2.0-flash-lite",      "v1beta", 2),   # Lite fallback
+        ("gemini-flash-lite-latest",   "v1beta", 2),   # Final lite fallback
     ]
 
     last_error = ""
 
-    for model, api_ver in models_to_try:
+    for model, api_ver, max_retries in models_to_try:
         url = (
             f"https://generativelanguage.googleapis.com/{api_ver}"
             f"/models/{model}:generateContent?key={_KEY}"
         )
 
-        for attempt in range(2):  # 2 tries per model
+        for attempt in range(max_retries):
             try:
-                res = requests.post(url, json=payload, timeout=60)
+                res = requests.post(url, json=payload, timeout=90)
 
                 # ── Success ──
                 if res.status_code == 200:
@@ -92,34 +79,36 @@ def call_gemini(
                         print(f"[gemini] ⚠️  Blocked by safety filter: {reason}")
                         return {"error": f"Response blocked by Gemini safety filters: {reason}"}
 
-                    if model != "gemini-2.5-flash":
-                        print(f"[gemini] ✅ Succeeded with fallback model: {model} ({api_ver})")
-                    else:
-                        print(f"[gemini] ✅ {model} ({api_ver}) OK")
+                    print(f"[gemini] ✅ {model} ({api_ver}) OK")
                     return json_res
 
                 body_preview = res.text[:300] if res.text else "(empty)"
 
                 # ── Rate limit (429) ── wait and retry same model
                 if res.status_code == 429:
-                    wait = 8 * (attempt + 1)  # 8s, 16s
+                    wait = 10 * (attempt + 1)  # 10s, 20s, 30s, 40s, 50s
                     print(
                         f"[gemini] ⏳ Rate limited on {model} "
-                        f"(attempt {attempt + 1}/2), waiting {wait}s…"
+                        f"(attempt {attempt + 1}/{max_retries}), waiting {wait}s…"
                     )
                     time.sleep(wait)
                     continue
 
-                # ── 404 model not found or 5xx server error ── move to next model
-                if res.status_code == 404 or res.status_code >= 500:
-                    label = "NOT_FOUND" if res.status_code == 404 else f"HTTP {res.status_code}"
+                # ── 503 server overload ── retry same model (transient)
+                if res.status_code >= 500:
                     print(
-                        f"[gemini] ⚠️  {model} ({api_ver}) → {label} "
-                        f"(attempt {attempt + 1}/2)"
+                        f"[gemini] ⚠️  {model} → HTTP {res.status_code} "
+                        f"(attempt {attempt + 1}/{max_retries})"
                     )
-                    last_error = f"{model} → {label}"
-                    time.sleep(2 * (attempt + 1))
+                    last_error = f"{model} → HTTP {res.status_code}"
+                    time.sleep(5 * (attempt + 1))
                     continue
+
+                # ── 404 model not found ── skip to next model immediately
+                if res.status_code == 404:
+                    print(f"[gemini] ⚠️  {model} ({api_ver}) → NOT_FOUND — skipping")
+                    last_error = f"{model} → NOT_FOUND"
+                    break
 
                 # ── Other 4xx (bad key, bad request) ── no point retrying
                 print(f"[gemini] ❌ {model} returned {res.status_code}: {body_preview}")
@@ -128,13 +117,13 @@ def call_gemini(
                 }
 
             except requests.exceptions.Timeout:
-                print(f"[gemini] ⏳ Timeout on {model} (attempt {attempt + 1}/2)")
+                print(f"[gemini] ⏳ Timeout on {model} (attempt {attempt + 1}/{max_retries})")
                 last_error = f"{model} → Timeout"
-                time.sleep(2)
+                time.sleep(3)
             except requests.exceptions.ConnectionError as e:
                 print(f"[gemini] 🔌 Connection error on {model}: {e}")
                 last_error = f"{model} → ConnectionError"
-                time.sleep(2)
+                time.sleep(3)
             except Exception as e:
                 print(f"[gemini] ❌ {model} failed: {type(e).__name__}: {e}")
                 last_error = f"{model} → {type(e).__name__}"
@@ -142,20 +131,13 @@ def call_gemini(
 
         print(f"[gemini] ➡️  Moving to next model (failed: {model})")
 
-    return {
-        "error": (
-            f"All Gemini models unavailable. Last error: {last_error}. "
-            "Please try again in a minute."
-        )
-    }
+    return {"error": f"All Gemini models failed. Last error: {last_error}"}
 
 
-# Alias used by doc.py and resume.py
 call_gemini_rest = call_gemini
 
 
 def extract_text(res: dict) -> str:
-    """Extract the generated text from a Gemini API response."""
     try:
         candidates = res.get("candidates", [])
         if candidates:
@@ -163,21 +145,6 @@ def extract_text(res: dict) -> str:
             text = "".join(part.get("text", "") for part in parts)
             if text.strip():
                 return text.strip()
-
-        if "text" in res:
-            return res["text"]
-
-        if "output_text" in res:
-            return res["output_text"]
-
-        # Candidate exists but text is empty — check finish reason
-        if candidates and not text.strip():
-            finish_reason = candidates[0].get("finishReason")
-            if finish_reason:
-                print(f"[gemini] ⚠️  Candidate failed with reason: {finish_reason}")
-                return f"[Blocked by safety: {finish_reason}]"
-
-    except Exception as e:
-        print(f"[gemini] extract_text error: {type(e).__name__}: {e}")
-
+    except Exception:
+        pass
     return ""

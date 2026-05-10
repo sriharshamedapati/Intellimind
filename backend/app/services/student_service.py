@@ -1,12 +1,10 @@
 """
 student_service.py — Student Data Access Layer
 ================================================
-All Supabase RPC calls and student-related DB queries.
-
-FIXES:
-- Added None safety checks for supabase client
-- Removed debug print statement
+Handles all Supabase queries for student data including
+chat summaries, user ID resolution, and session persistence.
 """
+from app.config import settings
 from app.db import supabase
 
 
@@ -18,56 +16,31 @@ def _check_db():
     return True
 
 
-def get_student_summary(student_roll: str):
-    if not _check_db():
-        return None
-    try:
-        r = supabase.rpc("get_student_summary", {"student_roll": student_roll}).execute()
-        return r.data
-    except Exception as e:
-        print(f"[student_service] get_student_summary error: {e}")
-        return None
-
-
-def get_student_activity(student_roll: str):
-    if not _check_db():
-        return None
-    try:
-        r = supabase.rpc("get_student_activity", {"student_roll": student_roll}).execute()
-        return r.data
-    except Exception as e:
-        print(f"[student_service] get_student_activity error: {e}")
-        return None
-
-
-def get_recent_activity(student_roll: str):
-    if not _check_db():
-        return None
-    try:
-        r = supabase.rpc("get_recent_activity", {"student_roll": student_roll}).execute()
-        return r.data
-    except Exception as e:
-        print(f"[student_service] get_recent_activity error: {e}")
-        return None
-
-
-def get_recent_summaries(user_id: str) -> list[str]:
-    """Fetch the 5 most recent chat summaries for memory context."""
+def get_student_memory(user_id: str, limit: int = None) -> list[dict]:
+    """Fetch recent chat summaries with full context (topics, weaknesses, scores)."""
     if not _check_db():
         return []
+    
+    fetch_limit = limit or settings.MEMORY_LIMIT
     try:
         result = (
             supabase.table("chat_summary")
-            .select("summary")
+            .select("summary, topics, strengths, weaknesses, score, date")
             .eq("user_id", user_id)
             .order("date", desc=True)
-            .limit(1)
+            .limit(fetch_limit)
             .execute()
         )
-        return [r["summary"] for r in result.data]
+        return result.data if result.data else []
     except Exception as e:
-        print(f"[student_service] get_recent_summaries error: {e}")
+        print(f"[student_service] get_student_memory error: {e}")
         return []
+
+
+def get_recent_summaries(user_id: str) -> list[str]:
+    """Backward compatible wrapper — returns only summary strings."""
+    memory = get_student_memory(user_id)
+    return [r["summary"] for r in memory if r.get("summary")]
 
 
 def save_chat_summary(roll: str, summary_data: dict, score: int):

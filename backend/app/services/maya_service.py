@@ -4,10 +4,8 @@ maya_service.py — Maya Platform Data Fetcher
 Fetches student problem counts, dashboard data, and skill tags
 from the Maya Technical Hub external API.
 """
+import os
 import requests
-import urllib3
-
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 MAYA_BASE_URL = "https://maya.technicalhub.io/node/api"
 HEADERS = {
@@ -18,13 +16,16 @@ HEADERS = {
 
 def _post(endpoint: str, roll_no: str) -> dict:
     """Internal helper — POST to Maya API with error handling."""
+    ca_bundle = os.getenv("MAYA_CA_BUNDLE")
+    verify_cert = ca_bundle if ca_bundle else True
+    
     try:
         res = requests.post(
             f"{MAYA_BASE_URL}/{endpoint}",
             json={"roll_no": roll_no},
             headers=HEADERS,
             timeout=10,
-            verify=False,
+            verify=verify_cert,
         )
         return res.json()
     except Exception as e:

@@ -118,8 +118,10 @@ async function analyseDocument() {
   formData.append("student_roll", roll);
 
   try {
+    const token = await getAuthToken();
     const res = await fetch(`${API_BASE}/analyze-doc`, {
       method: "POST",
+      headers: { "Authorization": `Bearer ${token}` },
       body: formData,
     });
 
@@ -274,9 +276,13 @@ async function sendDocMessage(panel) {
   const typingId = _appendTyping(panel);
 
   try {
+    const token = await getAuthToken();
     const res = await fetch(`${API_BASE}/doc/chat`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
       body: JSON.stringify({
         session_id:   currentSession.session_id,
         question:     question,
@@ -337,7 +343,7 @@ function _appendMsg(panel, role, text) {
 
   const sender = document.createElement("div");
   sender.className   = "msg-sender";
-  sender.textContent = isUser ? rollShort : "IntelliMind";
+  sender.textContent = isUser ? rollShort : "INTELLMIND";
 
   const bubble = document.createElement("div");
   bubble.className = "msg-bubble";

@@ -23,7 +23,8 @@
   display:flex; align-items:center; justify-content:center;
 }
 .logo-box svg { width:17px; height:17px; stroke:#fff; stroke-width:2; fill:none; }
-.logo .y { color:var(--yellow); }
+.logo .g { color: var(--green); }
+.logo .y { color: var(--yellow); }
 .tb-divider { width:1px; height:18px; background:var(--border); }
 
 /* ── PAGE LABEL ── */

@@ -1,46 +1,33 @@
 """
 roadmap.py — Roadmap Planner Route
 =====================================
-POST   /roadmap/generate        → Generate AI study plan (max 3/month)
-GET    /roadmap/plans/{roll}    → List all plans for a student
-PATCH  /roadmap/plans/{plan_id}/activate   → Set plan as active
-PATCH  /roadmap/tasks/{task_id}/complete   → Mark task done
-GET    /roadmap/active/{roll}   → Get active plan + today's task
+AI-generated personalised study plans based on student performance data.
 
-RULES:
-- Only 1 active plan at a time
-- Student CANNOT delete a plan (must complete current plan to generate new one)
-- Max 3 plans per month
-- Duration: 7, 15, 21, or 30 days
+Endpoints:
+    POST   /roadmap/generate                → Generate AI study plan (max 3/month)
+    GET    /roadmap/plans/{roll}             → List all plans for a student
+    PATCH  /roadmap/plans/{plan_id}/activate → Set plan as active
+    PATCH  /roadmap/tasks/{task_id}/complete → Mark task done
+    GET    /roadmap/active/{roll}            → Get active plan + today's task
 
-Owner: Bhagya
-Integrated by: Karthik
-
-INTEGRATION FIXES:
-- Imports changed: app.supabase_client → app.db (matches main project)
-- Imports changed: app.maya_data → app.services.maya_service
-- Removed scheduler dependency
-- Removed DELETE endpoint (by design — students must complete plans)
-- Duration options: 7, 15, 21, 30 days (was only 7 or 14)
-- Active plan check before generating new plan
+Rules:
+    - Only 1 active plan at a time
+    - Students must complete the current plan before generating a new one
+    - Max 3 plans per month
+    - Duration options: 7, 15, 21, or 30 days
 """
 
-import os
 import re
 import json
-import time
-import requests
+import random
 from datetime import datetime, timezone
 from collections import Counter, defaultdict
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
+from app.auth import get_current_user, verify_student_roll
 
-# ── FIXED IMPORT: was `import app.supabase_client as _sc`
-# Main project uses app.db — DO NOT change app.db
 from app.db import supabase
-
-# ── FIXED IMPORT: was `from app.maya_data import get_skill_tags_details`
 from app.services.maya_service import get_skill_tags_details
 
 from app.config import settings
@@ -51,10 +38,11 @@ router = APIRouter(prefix="/roadmap", tags=["Roadmap"])
 VALID_DURATIONS = (7, 15, 21, 30)
 MAX_PLANS_PER_MONTH = 3
 
+def _check_db():
+    if supabase is None:
+        raise HTTPException(status_code=503, detail="Database unavailable")
 
-# ─── Gemini Helper ───────────────────────────────────────────────────────────
 
-# Removed private _call_gemini_roadmap — now uses central app.services.gemini
 
 
 # ─── Student Profile ─────────────────────────────────────────────────────────
@@ -179,7 +167,6 @@ KEYWORD_MAP = [
 
 def _generate_fallback_plan(weak_topics: str, duration_days: int, avg_score: float, weak_tags: list, topic: str = "") -> dict:
     """Generate a personalised study plan without Gemini."""
-    import random
 
     # Merge Maya tags and user requested topic into weak topics
     if weak_tags:
@@ -241,11 +228,6 @@ def _generate_plan_with_gemini(roll: str, duration_days: int, topic: str = "") -
         f"- Mix core topic study + coding practice + aptitude where appropriate\n\n"
         f'Output: {{"title": "<short plan name>", "tasks": [{{"day": 1, "description": "..."}}]}}'
     )
-
-    payload = {
-        "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {"temperature": 0.4, "maxOutputTokens": 2000},
-    }
 
     data = call_gemini(prompt, response_mime_type="application/json")
     if "error" in data:
@@ -340,15 +322,23 @@ class GenerateRequest(BaseModel):
     topic: str = ""
 
 @router.post("/generate")
-def generate_plan(req: GenerateRequest):
+def generate_plan(req: GenerateRequest, user: dict = Depends(get_current_user)):
     """
     Generate a new AI study plan.
     - Max 3 plans per month
     - Cannot generate if an active plan is not yet completed
     """
+    _check_db()
     roll = req.student_roll.upper().strip()
+    
+    # Security check
+    verify_student_roll(roll, user)
     if not roll:
         raise HTTPException(status_code=400, detail="student_roll is required")
+        
+    if not re.match(r"^[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{4}$", roll):
+        raise HTTPException(status_code=422, detail="Invalid roll number format. Expected format: 22A91A0501")
+        
     if req.duration_days not in VALID_DURATIONS:
         raise HTTPException(
             status_code=400,
@@ -417,9 +407,13 @@ def generate_plan(req: GenerateRequest):
 
 
 @router.get("/plans/{roll}")
-def list_plans(roll: str):
+def list_plans(roll: str, user: dict = Depends(get_current_user)):
     """List all study plans for a student, newest first."""
+    _check_db()
     roll = roll.upper().strip()
+    
+    # Security check
+    verify_student_roll(roll, user)
     result = (
         supabase.table("study_plans")
         .select("*, plan_tasks(id, day_number, description, status)")
@@ -437,11 +431,12 @@ def list_plans(roll: str):
 
 
 @router.patch("/plans/{plan_id}/activate")
-def activate_plan(plan_id: str):
+def activate_plan(plan_id: str, user: dict = Depends(get_current_user)):
     """
     Set a plan as active. Deactivates all other plans for the same student.
     NOTE: Cannot activate if another plan is still in progress (not completed).
     """
+    _check_db()
     plan_res = (
         supabase.table("study_plans")
         .select("user_id, is_active")
@@ -452,6 +447,9 @@ def activate_plan(plan_id: str):
         raise HTTPException(status_code=404, detail="Plan not found")
 
     roll = plan_res.data[0]["user_id"]
+
+    # Security: verify the requesting user owns this plan
+    verify_student_roll(roll, user)
 
     # Check if there's already an active incomplete plan
     active_res = (
@@ -480,8 +478,32 @@ def activate_plan(plan_id: str):
 
 
 @router.patch("/tasks/{task_id}/complete")
-def complete_task(task_id: str):
+def complete_task(task_id: str, user: dict = Depends(get_current_user)):
     """Mark a task as completed."""
+    _check_db()
+
+    # Security: fetch the task's plan_id, then verify user owns that plan
+    task_res = (
+        supabase.table("plan_tasks")
+        .select("plan_id")
+        .eq("id", task_id)
+        .execute()
+    )
+    if not task_res.data:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    plan_id = task_res.data[0]["plan_id"]
+    plan_res = (
+        supabase.table("study_plans")
+        .select("user_id")
+        .eq("id", plan_id)
+        .execute()
+    )
+    if plan_res.data:
+        roll = plan_res.data[0]["user_id"]
+        verify_student_roll(roll, user)
+
+    # Mark the task as completed
     result = (
         supabase.table("plan_tasks")
         .update({"status": "completed"})
@@ -494,9 +516,13 @@ def complete_task(task_id: str):
 
 
 @router.get("/active/{roll}")
-def get_active_plan(roll: str):
+def get_active_plan(roll: str, user: dict = Depends(get_current_user)):
     """Return the active plan with all tasks, highlighting today's task."""
+    _check_db()
     roll = roll.upper().strip()
+    
+    # Security check
+    verify_student_roll(roll, user)
     plan_res = (
         supabase.table("study_plans")
         .select("*, plan_tasks(id, day_number, description, status)")

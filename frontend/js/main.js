@@ -141,7 +141,7 @@ class HowItWorksSection extends HTMLElement {
             <section id="about" class="how-it-works">
                 <div class="container">
                     <div class="section-header animate-on-scroll">
-                        <h2>How <span>IntelliMind</span> Works</h2>
+                        <h2>How <span>INTELLMIND</span> Works</h2>
                     </div>
                     <div class="steps-container">${stepsHtml}</div>
                 </div>
@@ -160,7 +160,7 @@ class CtaSection extends HTMLElement {
                 <div class="container">
                     <div class="cta-content animate-on-scroll">
                         <h2>Ready to transform your learning?</h2>
-                        <p>Join thousands of students using IntelliMind's AI insights to master coding, aptitude, and communication skills.</p>
+                        <p>Join thousands of students using INTELLMIND's AI insights to master coding, aptitude, and communication skills.</p>
                         <button class="btn-cta" onclick="window.location.href='login/index.html'">
                             Get Started Now
                             <svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
@@ -184,9 +184,9 @@ class AppFooter extends HTMLElement {
                         <div class="footer-brand-wrap">
                             <div class="footer-logo">
                                 <div class="footer-logo-box">
-                                    <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/><path d="M17.599 6.5a3 3 0 0 0 .399-1.375"/><path d="M6.002 5.125A3 3 0 0 0 6.401 6.5"/><path d="M3.477 10.896a4 4 0 0 1 .585-.396"/><path d="M19.938 10.5a4 4 0 0 1 .585.396"/><path d="M6 18a4 4 0 0 1-1.967-.516"/><path d="M19.967 17.484A4 4 0 0 1 18 18"/></svg>
                                 </div>
-                                <span>Intelli<span class="y">Mind</span></span>
+                                <span>INTELL<span class="y">MIND</span></span>
                             </div>
                             <p>AI Learning Intelligence for Maya &amp; HOOT. Empowering students through data.</p>
                         </div>
@@ -220,7 +220,7 @@ class AppFooter extends HTMLElement {
                     </div>
 
                     <div class="footer-bottom">
-                        &copy; 2026 IntelliMind. All rights reserved. Empowering academic excellence.
+                        &copy; 2026 INTELLMIND. All rights reserved. Empowering academic excellence.
                     </div>
                 </div>
             </footer>

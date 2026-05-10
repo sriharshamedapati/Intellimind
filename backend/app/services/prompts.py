@@ -1,7 +1,7 @@
 """
 prompts.py — Dynamic Prompt Engineering Layer
 ===============================================
-Builds task-specific prompts for IntelliMind.
+Builds task-specific prompts for INTELLMIND.
 Only includes data sections that were actually fetched (non-null).
 """
 
@@ -11,7 +11,7 @@ Only includes data sections that were actually fetched (non-null).
 def chat_prompt(data: dict) -> str:
     sections = []
 
-    sections.append(f"""You are IntelliMind, a prestigious AI Learning Tutor and Academic Mentor specialized in engineering, computational sciences, and professional career development.
+    sections.append(f"""You are INTELLMIND, a prestigious AI Learning Tutor and Academic Mentor specialized in engineering, computational sciences, and professional career development.
 
 Student Identity: {data['roll']}
 
@@ -119,7 +119,7 @@ STUDENT QUESTION
 def voice_prompt(data: dict) -> str:
     sections = []
 
-    sections.append(f"""You are IntelliMind, a professional and articulate AI Tutor. You are currently in a voice conversation with a student.
+    sections.append(f"""You are INTELLMIND, a professional and articulate AI Tutor. You are currently in a voice conversation with a student.
 
 Student Identity: {data['roll']}
 
@@ -177,7 +177,7 @@ STUDENT QUESTION
 def placement_prompt(data: dict) -> str:
     sections = []
 
-    sections.append(f"""You are IntelliMind, a Senior Career Strategist and Professional Placement Coach.
+    sections.append(f"""You are INTELLMIND, a Senior Career Strategist and Professional Placement Coach.
 
 Student Identity: {data['roll']}
 
@@ -230,7 +230,7 @@ Max 5 bullets total. End with one sharp, strategic follow-up question.""")
 def roadmap_prompt(data: dict) -> str:
     sections = []
 
-    sections.append(f"""You are IntelliMind, an expert career mentor.
+    sections.append(f"""You are INTELLMIND, an expert career mentor.
 
 Student Roll Number: {data['roll']}
 
@@ -270,46 +270,6 @@ USER GOAL
     return "\n".join(sections)
 
 
-# ---------- DOCUMENT ANALYSIS PROMPT ----------
-
-def doc_prompt(data: dict) -> str:
-    return f"""You are an AI academic assistant.
-
-Analyze the following document and provide:
-
-1. **Summary** — A concise overview of what the document is about.
-2. **Key Topics** — The main subjects or themes covered.
-3. **Important Points** — Critical takeaways, facts, or action items.
-4. **Possible Questions** — Questions a student might be asked about this content.
-
--------------------------
-DOCUMENT CONTENT
--------------------------
-{data['text']}"""
-
-
-# ---------- DOCUMENT CHAT PROMPT ----------
-
-def doc_chat_prompt(document_text: str, question: str) -> str:
-    return f"""You are an AI academic assistant. A student has uploaded a document and is asking questions about it.
-
-RULES:
-- Answer ONLY based on the document content provided below.
-- If the answer is NOT found in the document, explicitly say: "This information is not found in the uploaded document."
-- Be concise and accurate.
-- Use markdown formatting for clarity.
-- Quote relevant parts of the document when helpful.
-
--------------------------
-DOCUMENT CONTENT
--------------------------
-{document_text}
-
--------------------------
-STUDENT QUESTION
--------------------------
-{question}"""
-
 
 # ---------- MASTER SELECTOR ----------
 
@@ -319,7 +279,6 @@ def get_prompt(mode: str, data: dict) -> str:
         "voice": voice_prompt,
         "placement": placement_prompt,
         "roadmap": roadmap_prompt,
-        "doc": doc_prompt,
     }
 
     return mapping.get(mode, chat_prompt)(data)

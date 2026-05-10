@@ -37,7 +37,7 @@ class HeroSection extends HTMLElement {
                             <div class="abstract-orb-wrapper">
                                 <div class="dial-circle"></div>
                                 <div class="abstract-orb">
-                                    <img src="images/robot.png" alt="IntelliMind AI Robot">
+                                    <img src="../images/robot.png" alt="INTELLMIND AI Robot">
                                 </div>
                             </div>
 
@@ -55,7 +55,7 @@ class HeroSection extends HTMLElement {
                                 <div class="fc-left">
                                     <div class="fc-since">Since 2026</div>
                                     <div class="fc-name">
-                                        <span class="g">Intelli</span><span class="y">Mind</span>
+                                        <span class="g">INTELL</span><span class="y">MIND</span>
                                     </div>
                                 </div>
                                 <div class="fc-divider">

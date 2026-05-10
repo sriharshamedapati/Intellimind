@@ -51,7 +51,7 @@ class AiCoachSection extends HTMLElement {
                                     <svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                                 </div>
                                 <div class="chat-header-text">
-                                    <h4>IntelliMind Coach</h4>
+                                    <h4>INTELLMIND Coach</h4>
                                     <p>Your data loaded · Online</p>
                                 </div>
                                 <div class="chat-header-status">

@@ -55,6 +55,12 @@ CURRENT MESSAGE:
 
         print(f"[summarizer] 🔍 Raw output: {text[:200]}...")
 
+        # Strip markdown code fences if Gemini wrapped JSON in ```json ... ```
+        text = text.strip()
+        fence_match = re.search(r"```(?:json)?\s*([\s\S]+?)\s*```", text)
+        if fence_match:
+            text = fence_match.group(1).strip()
+
         # Extract JSON using regex
         match = re.search(r"\{.*\}", text, re.DOTALL)
 

@@ -1,11 +1,8 @@
 /* ============================================================
    roadmap.js — Roadmap Planner Frontend Logic
    ============================================================
-   INTEGRATION FIXES (Bhagya → Main Project):
-   - Removed hardcoded API_BASE http://localhost:8000
-   - Now uses window.INTELLIMIND_API_BASE (set by HTML, same as other pages)
-   - Auth reads from sessionStorage im_roll (consistent with chat/doc pages)
-   - Duration options: 7, 15, 21, 30 days
+   Manages plan generation, task tracking, and progress display.
+   Duration options: 7, 15, 21, 30 days | Max 3 plans/month.
    ============================================================ */
 
 // API_BASE is provided by shared/js/config.js (loaded before this script)
@@ -68,9 +65,13 @@ async function generatePlan() {
     const topicInput = document.getElementById("roadmapTopic");
     const topicText  = topicInput ? topicInput.value.trim() : "";
 
+    const token = await getAuthToken();
     const res = await fetch(`${API_BASE}/roadmap/generate`, {
       method:  "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
       body:    JSON.stringify({ student_roll: roll, duration_days: selectedDuration, topic: topicText }),
       signal:  controller.signal,
     });
@@ -108,7 +109,10 @@ window.generatePlan = generatePlan;
 // ─── Load All Plans ───────────────────────────────────────────────────────────
 async function loadPlans() {
   try {
-    const res  = await fetch(`${API_BASE}/roadmap/plans/${roll}`);
+    const token = await getAuthToken();
+    const res  = await fetch(`${API_BASE}/roadmap/plans/${roll}`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
     const data = await res.json();
     allPlans   = data.plans || [];
     renderPlansList(allPlans, data.plans_used_this_month, data.plans_remaining_this_month);
@@ -212,7 +216,11 @@ window.togglePlan = togglePlan;
 // ─── Activate Plan ────────────────────────────────────────────────────────────
 async function activatePlan(planId) {
   try {
-    const res  = await fetch(`${API_BASE}/roadmap/plans/${planId}/activate`, { method: "PATCH" });
+    const token = await getAuthToken();
+    const res  = await fetch(`${API_BASE}/roadmap/plans/${planId}/activate`, { 
+      method: "PATCH",
+      headers: { "Authorization": `Bearer ${token}` }
+    });
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || "Could not activate plan");
     showRoadmapToast("✅ Plan activated!", "success");
@@ -227,7 +235,11 @@ window.activatePlan = activatePlan;
 // ─── Mark Task Done ───────────────────────────────────────────────────────────
 async function markTaskDone(taskId) {
   try {
-    const res  = await fetch(`${API_BASE}/roadmap/tasks/${taskId}/complete`, { method: "PATCH" });
+    const token = await getAuthToken();
+    const res  = await fetch(`${API_BASE}/roadmap/tasks/${taskId}/complete`, { 
+      method: "PATCH",
+      headers: { "Authorization": `Bearer ${token}` }
+    });
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || "Could not mark task done");
     showRoadmapToast("✅ Task completed!", "success");
@@ -242,7 +254,10 @@ window.markTaskDone = markTaskDone;
 // ─── Load Active Plan ─────────────────────────────────────────────────────────
 async function loadActivePlan() {
   try {
-    const res  = await fetch(`${API_BASE}/roadmap/active/${roll}`);
+    const token = await getAuthToken();
+    const res  = await fetch(`${API_BASE}/roadmap/active/${roll}`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
     const data = await res.json();
 
     if (!data.active_plan || !data.today_task) {

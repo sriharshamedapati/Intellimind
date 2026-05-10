@@ -1,11 +1,8 @@
 """
 config.py — Centralized Configuration
 =====================================
-Single source for all env vars. Loaded once at startup.
-
-FIXES:
-- Added flexible CORS origins (localhost any port + Vercel deployment)
-- Added GEMINI_MODEL fallback chain
+Single source of truth for all environment variables.
+Loaded once at startup via python-dotenv.
 """
 
 import os
@@ -19,15 +16,17 @@ class Settings:
         # ── Supabase ──
         self.SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
         self.SUPABASE_KEY: str = os.getenv("SUPABASE_KEY", "")
+        
+        # ── Auth Supabase (for JWT verification) ──
+        self.AUTH_SUPABASE_URL: str = os.getenv("AUTH_SUPABASE_URL", "")
+        self.AUTH_SUPABASE_KEY: str = os.getenv("AUTH_SUPABASE_KEY", "")
 
         # ── Gemini ──
         self.GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
-        self.GEMINI_MODEL: str = "gemini-2.5-flash"
+        self.GEMINI_MODEL: str = "gemini-2.0-flash"
 
-        self.GEMINI_URL: str = (
-            f"https://generativelanguage.googleapis.com/v1beta/"
-            f"models/{self.GEMINI_MODEL}:generateContent?key={self.GEMINI_API_KEY}"
-        )
+        # ── Personalization ──
+        self.MEMORY_LIMIT: int = int(os.getenv("MEMORY_LIMIT", "5"))
 
         # ── CORS ──
         # Allow common local dev ports + Vercel + custom env overrides
