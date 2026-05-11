@@ -19,7 +19,7 @@ async def get_current_user(authorization: str = Header(None)):
     if not auth_supabase:
         # If auth is not configured, log a warning but let the request through
         # This prevents the app from breaking if AUTH env vars are missing
-        print("[auth] ⚠️  Auth Supabase not configured — skipping verification")
+        print("[auth] [WARN] Auth Supabase not configured — skipping verification")
         return None
 
     # ── Guard: header must be present ──
@@ -50,13 +50,13 @@ async def get_current_user(authorization: str = Header(None)):
         if not res or not res.user:
             raise HTTPException(status_code=401, detail="Invalid or expired session")
 
-        print(f"[auth] ✅ Verified user: {res.user.email}")
+        print(f"[auth] [OK] Verified user: {res.user.email}")
         return res.user
 
     except HTTPException:
         raise  # Re-raise our own HTTPExceptions
     except Exception as e:
-        print(f"[auth] ❌ Verification failed: {e}")
+        print(f"[auth] [ERROR] Verification failed: {e}")
         raise HTTPException(
             status_code=401,
             detail="Authentication failed. Please sign in again."
@@ -81,7 +81,7 @@ def verify_student_roll(requested_roll: str, user):
     requested  = requested_roll.upper().strip()
 
     if email_roll != requested:
-        print(f"[auth] 🚫 Roll mismatch: token={email_roll}, requested={requested}")
+        print(f"[auth] [DENIED] Roll mismatch: token={email_roll}, requested={requested}")
         raise HTTPException(
             status_code=403,
             detail="You are not authorized to access this student's data."

@@ -53,7 +53,7 @@ async def chat(request: ChatRequest, user: dict = Depends(get_current_user)):
 
     # ── 1. Detect intent ──
     intents = detect_intent(message)
-    print(f"[chat] 🎯 Intents detected: {intents} | Message: {message[:80]}")
+    print(f"[chat] [INTENT] Intents detected: {intents} | Message: {message[:80]}")
 
     # ── 2. Smart data fetching — only fetch what's needed ──
     data = {
@@ -102,10 +102,10 @@ async def chat(request: ChatRequest, user: dict = Depends(get_current_user)):
         user_id = get_user_id(roll)
         if user_id:
             data["hoot_data"] = get_hoot_data(user_id)
-            print(f"[chat] 🎧 Fetched Hoot LSRW data")
+            print(f"[chat] [HOOT] Fetched Hoot LSRW data")
         else:
             data["hoot_data"] = None
-            print(f"[chat] ⚠️ Could not resolve user_id for Hoot data")
+            print(f"[chat] [WARN] Could not resolve user_id for Hoot data")
     else:
         data["hoot_data"] = None
 

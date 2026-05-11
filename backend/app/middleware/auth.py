@@ -42,7 +42,7 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
 
         # ── Guard: auth client must be configured ──
         if not auth_supabase:
-            print("[middleware/auth] ⚠️  Auth Supabase not configured — skipping verification")
+            print("[middleware/auth] [WARN] Auth Supabase not configured — skipping verification")
             request.state.user_id = None
             return await call_next(request)
 
@@ -82,10 +82,10 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
 
             # Inject verified user_id into request.state
             request.state.user_id = res.user.id
-            print(f"[middleware/auth] ✅ Verified: {res.user.email}")
+            print(f"[middleware/auth] [OK] Verified: {res.user.email}")
 
         except Exception as e:
-            print(f"[middleware/auth] ❌ Verification failed: {e}")
+            print(f"[middleware/auth] [ERROR] Verification failed: {e}")
             return JSONResponse(
                 status_code=401,
                 content={"detail": "Authentication failed. Please sign in again."},
